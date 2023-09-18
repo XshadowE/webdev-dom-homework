@@ -118,7 +118,7 @@
       const appComments = responseData.comments.map((comment) => {
         return {
           name: comment.author.name,
-          date: comment.date,
+          date: new Date(comment.date),
           text: comment.text,
           likes: comment.likes,
         };
@@ -217,6 +217,7 @@
       body: JSON.stringify({
         name: nameInputElement.value,
         text: textInputElement.value,
+       
       }),
     });
 
