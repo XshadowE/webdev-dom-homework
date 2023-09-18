@@ -8,42 +8,10 @@
 
   <body>
     <div class="container">
-      <ul id="comments" class="comments">
-        <li class="comment">
-          <div class="comment-header">
-            <div>Глеб Фокин</div>
-            <div>12.02.22 12:18</div>
-          </div>
-          <div class="comment-body">
-            <div class="comment-text">
-              Это будет первый комментарий на этой странице
-            </div>
-          </div>
-          <div class="comment-footer">
-            <div class="likes">
-              <span class="likes-counter">3</span>
-              <button class="like-button"></button>
-            </div>
-          </div>
-        </li>
-        <li class="comment">
-          <div class="comment-header">
-            <div>Варвара Н.</div>
-            <div>13.02.22 19:22</div>
-          </div>
-          <div class="comment-body">
-            <div class="comment-text">
-              Мне нравится как оформлена эта страница! ❤
-            </div>
-          </div>
-          <div class="comment-footer">
-            <div class="likes">
-              <span class="likes-counter">75</span>
-              <button class="like-button -active-like"></button>
-            </div>
-          </div>
-        </li>
+      <ul class="comments" id="comments">
+       <!-- Список рендерится из JS-->
       </ul>
+      <button class="delete-button">Удалить последний элемент</button>
       <div class="add-form">
         <input
           type="text" id="name-input"
@@ -58,10 +26,9 @@
         ></textarea>
         <div class="add-form-row">
           <button id="add-button" class="add-form-button">Написать</button>
-          
         </div>
+       </div>
       </div>
-    </div>
   </body>
 
 
@@ -76,22 +43,218 @@
     const buttonElement = document.getElementById("add-button");
     const commentsElement = document.getElementById("comments");
     const nameInputElement = document.getElementById("name-input");
+    const textInputElement = document.querySelector(".add-form-text");
     const textareaInputElement = document.getElementById("textarea-input");
+    const formsInputElement = document.querySelector(".add-form");
+    const commentEditText = document.querySelectorAll("comment-edit-text");
+
+      // Ответ на комментарий
+    const answerText = () => {
+    const textTextElement = document.querySelectorAll('.comment-text');
+    const textNameElement = document.querySelectorAll('.comment-name');
+    for (const text of textTextElement) {
+      text.addEventListener("click", () => {
+        const index = text.dataset.index;
+
+        textInputElement.value = 
+        `>${textTextElement[index].innerHTML} ${textNameElement[index].innerHTML}`;
+      })
+    }
+    };
+
+
+    // Кнопка лайков работает
+    const initEventlikes = () => {
+      const likeButtons = Array.from(document.querySelectorAll(".like-button"));
+      const likeCount = Array.from(document.querySelectorAll(".likes-counter"));
+
+      likeButtons.forEach((button, index) => {
+        button.addEventListener('click', () => {
+          button.classList.toggle('-active-like');
+          const current = Number(likeCount[index].innerHTML);
+          const plus = button.classList.contains('-active-like') ? 1 : - 1;
+          likeCount[index].innerHTML = current + plus;
+        });
+      });
+    }
+
+  const initDeliteButtonsListeners = () => {
+    const deleteButtonElement = document.querySelector(".delete-button");
     
-    const commentElements = document.querySelectorAll('.comment');
+    
+    deleteButtonElement.addEventListener('click', () => {
+      comments.pop();
+      renderComments();
+    });
+    
+  };
+    
+    // Массив TODO получать из хранилища данных
+    let comments = [
+      {
+        name: "Глеб",
+        date: "12.02.22 12:18",
+        text: "Это будет первый комментарий на этой странице",
+        likes: "3",
+      },
+      {
+        name: "Варвара",
+        date: "13.02.22 19:22",
+        text: "Мне нравится как оформлена эта страница! ❤",
+        likes: "75",
+      },
+    ];
+
+    const fetchPromise = fetch(
+    'https://wedev-api.sky.pro/api/v1/evgeniya-ko/comments',
+    {
+      method: "GET"
+    });
+    fetchPromise.then((response) => {
+
+    const jsonPromise = response.json();
+      console.log(jsonPromise);
+    jsonPromise.then((responseData) => {
+      const appComments = responseData.comments.map((comment) => {
+        return {
+          name: comment.author.name,
+          date: new Date(comment.date),
+          text: comment.text,
+          likes: comment.likes,
+        };
+       
+      });
+
+      comments = responseData.comments;
+      comments = appComments;
+      renderComments();
+    });
+});
+
+    // Рендер
+    const renderComments = () => {
+      const commentsHtml = comments.map((comment, index) => {
+        return  ` <li class="comment">
+          <div class="comment-header">
+            <div class="comment-name" data-index="${index}">${comment.name}</div>
+            <div>${comment.date}</div>
+          </div>
+          <div class="comment-body">
+          <div class="comment-text" data-index="${index}">
+            ${comment.text}
+            </div>
+          </div>  
+          </div>
+          <div class="comment-footer">
+            <div class="likes">
+              <span class="likes-counter">${comment.likes}</span>
+              <button class="like-button"></button>
+            </div>
+          </div>
+        </li> `
+        
+      
+      }).join("");
+
+      commentsElement.innerHTML = commentsHtml;
+      answerText();
+      initEventlikes();
+      initDeliteButtonsListeners();
+    };
+      
+    
+
+    /* код для проверки, что комментарий не пустой и отправки комментария 
+    скопировали код nameInput чтобы не писать его дважды, тк одно действие и те же проверки
+    */
+    const onSubmit = () => {
+      nameInputElement.classList.remove("error");
+    if (nameInputElement.value === '') {
+      nameInputElement.classList.add("error"); 
+      return;
+    }
+      textareaInputElement.classList.remove("error");
+    if (textareaInputElement.value === '') {
+      textareaInputElement.classList.add("error"); 
+      return;
+    }
+
+
+    // дополнительно кнопка написать не активна при пустых значениях //
+    buttonElement.setAttribute('disabled', true);
+    nameInputElement.oninput = function(){
+      if (nameInputElement.value === '' && textareaInputElement.value === ''){
+        buttonElement.setAttribute('disabled', true);
+        return;
+      }else{
+        buttonElement.removeAttribute('disabled');
+        return;
+      }
+    }
+  
+    
+    /////////////////////////////////////////////
+    // TODO добавлять задачу в хранилище данных
+
+    comments.push({
+      name: nameInputElement.value
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;"),
+
+      text: textareaInputElement.value
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;"),
+
+      date: formatDate(d),
+      likes: "0",
+      
+    });
+
+    const fetchPromise = fetch(
+    'https://wedev-api.sky.pro/api/v1/evgeniya-ko/comments',
+    {
+      method: "POST",
+      body: JSON.stringify({
+        name: nameInputElement.value,
+        text: textInputElement.value,
+       
+      }),
+    });
+
+    fetchPromise.then((response) => {
+      const jsonPromise = response.json();
+      jsonPromise.then((responseData) => {
+        comments = responseData.comments;
+    
+      });
+  });
+
+  renderComments();
+    
+    // обнуляет введенные значения
+    nameInputElement.value = "";
+    textareaInputElement.value = "";
+    }
+
+    document.addEventListener("keydown", (event) => {
+     
+     if (event.key === "Enter") {
+       onSubmit();
+     }
+   })
 
     const initEventListeners = () => {
       const commentElements = document.querySelectorAll('.comment');
     for (const commentElement of commentElements) {
       commentElement.addEventListener("click", () => {
-        console.log(1);
+        
         });
       }
     }
 
-    initEventListeners();
-    
+  renderComments();
 
+    // Текущая дата
     function formatDate(date) {
     var dd = date.getDate();
     if (dd < 10) dd = '0' + dd;
@@ -106,68 +269,9 @@
 }   
     var d = new Date();
 
-    buttonElement.addEventListener('click', () => {
-     nameInputElement.classList.remove("error");
-    if (nameInputElement.value === '') {
-      nameInputElement.classList.add("error"); 
-      return;
-    }
-      textareaInputElement.classList.remove("error");
-    if (textareaInputElement.value === '') {
-      textareaInputElement.classList.add("error"); 
-      return;
-    }
 
-
-    // дополнительно
-    buttonElement.setAttribute('disabled', true);
-    nameInputElement.oninput = function(){
-      if (nameInputElement.value === ''){
-        buttonElement.setAttribute('disabled', true);
-        return;
-      }else{
-        buttonElement.removeAttribute('disabled');
-        return;
-      }
-    }
-  
-    buttonElement.setAttribute('disabled', true);
-    textareaInputElement.oninput = function(){
-      if (textareaInputElement.value === ''){
-        buttonElement.setAttribute('disabled', true);
-        return;
-      }else{
-        buttonElement.removeAttribute('disabled');
-        return;
-      }
-    }
-    /////////////////////////////////////////////
-
-    const oldCommentsHTML = commentsElement.innerHTML;
-      commentsElement.innerHTML = oldCommentsHTML +
-       ` <li class="comment">${nameInputElement.value}
-          <div class="comment-header">
-            <div></div>
-            <div>${formatDate(d)} </div>
-          </div>
-          <div class="comment-body">
-            <div class="comment-text">
-              ${textareaInputElement.value}
-            </div>
-          </div>
-          <div class="comment-footer">
-            <div class="likes">
-              <span class="likes-counter">0</span>
-              <button class="like-button -active-like"></button>
-            </div>
-          </div>
-        </li> `
-
-    
-        initEventListeners();
-        nameInputElement.value = "";
-        textareaInputElement.value = "";
-    });
+    // Вынесли код обработчика в отдельную функцию onSubmit - (enterPress)
+    buttonElement.addEventListener('click', onSubmit);
     
   </script>
 </html>
