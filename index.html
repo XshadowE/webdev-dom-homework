@@ -83,7 +83,8 @@
     fetchPromise.then((response) => {
     const jsonPromise = response.json();
     jsonPromise.then((responseData) => {
-      const appComments = responseData.comments.map((comment) => {
+      comments = responseData.comments.map((comment) => {
+        
         return {
           name: comment.author.name,
           date: new Date(comment.date).toLocaleString(),
@@ -200,11 +201,13 @@
         })
         .then((responseData) => {
           comments = responseData.comments;
+          renderComments();
         })
         .then((data) => {
           buttonElement.disabled = false;
           buttonElement.textContent = 'Написать';
         });
+        
         
 
     // обнуляет введенные значения
