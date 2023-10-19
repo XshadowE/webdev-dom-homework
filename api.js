@@ -13,7 +13,7 @@ export function getComments() {
   return fetch(host, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${token}`,
+    Authorization: `Bearer ${token}`,
     },
   }).then((response) => {
     return response.json();
@@ -29,7 +29,7 @@ export function postComment({ name, text }) {
     body: JSON.stringify({
       name: name,
       text: text,
-      date: `${format(new Date(now), 'yyyy-MM-dd hh.mm.ss')}`,
+      date: `${format(new Date(now), "yyyy-MM-dd hh.mm.ss")}`,
       forceError: false,
     }),
     headers: {

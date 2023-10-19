@@ -1,6 +1,5 @@
 import { initEventlikes } from "./Initialization.js";
 import { token } from "./api.js";
-//import { formatDateToRu, formatDateToUs } from "./lib/formatDate/formatDate.js"
 import { format } from "date-fns";
 import { renderFormComments } from "./renderFormComments.js";
 import {comments} from "./main.js";
@@ -9,10 +8,9 @@ import { renderLogin } from "./loginPage.js";
 export const renderComments = () => {
   const appElement = document.getElementById("app");
     console.log(comments);
-    //const country = "ru";
     const commentsHtml = comments
       .map((comment, index) => {
-        const createDate = format(new Date(comment.date), 'yyyy-MM-dd hh.mm.ss');
+        const createDate = format(new Date(comment.date), "yyyy-MM-dd hh.mm.ss");
         return ` <li class="comment">
             <div class="comment-header">
               <div class="comment-name" data-index="${index}">${comment.name}</div>
@@ -67,19 +65,11 @@ const textInputElement = document.querySelector(".add-form-text");
       }
     };
 
-    const now = new Date();
+    /*const now = new Date();
     format(now, "dd/MM/yyyy hh:mm"); // 26/03/2023 10:33
     format(now, "MM-dd-yyyy hh:mm"); // 03-26-2023 10:33
     format(now, "dd.MM.yyyy hh:mm:ss"); // 26.03.2023 10:33:41*/
 
-
-
-    
-
-
-
-
-answerText();
-initEventlikes();
-
+  answerText();
+  initEventlikes();
 }
